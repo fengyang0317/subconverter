@@ -106,6 +106,17 @@ void trojanConstruct(Proxy &node, const std::string &group, const std::string &r
     node.Path = path;
 }
 
+void wireGuardConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &publicKey, const std::string &privateKey, const std::string &ip, const std::string &ipv6, const std::string &mtu, tribool udp, std::string& reserved, tribool tfo, tribool scv, tribool tls13)
+{
+    commonConstruct(node, ProxyType::WireGuard, group, remarks, server, port, udp, tfo, scv, tls13);
+    node.publicKey = publicKey;
+    node.privateKey = privateKey;
+    node.ip = ip;
+    node.ipv6 = ipv6;
+    node.mtu = mtu.empty() ? "1280" : mtu;
+    node.reserved = reserved;
+}
+
 void snellConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &password, const std::string &obfs, const std::string &host, uint16_t version, tribool udp, tribool tfo, tribool scv)
 {
     commonConstruct(node, ProxyType::Snell, group, remarks, server, port, udp, tfo, scv, tribool());
@@ -766,6 +777,52 @@ void explodeTrojan(std::string trojan, Proxy &node)
         group = TROJAN_DEFAULT_GROUP;
 
     trojanConstruct(node, group, remark, server, port, psk, network, host, path, true, tribool(), tfo, scv);
+}
+
+void explodeWireGuard(std::string link, Proxy &node)
+{
+    std::string server, port, addition, group, remark, publicKey, privateKey, ip, ipv6, mtu, reserved;
+    tribool udp;
+    link.erase(0, 5);
+    string_size pos = link.rfind("#");
+
+    if(pos != link.npos)
+    {
+        remark = urlDecode(link.substr(pos + 1));
+        link.erase(pos);
+    }
+    pos = link.find("?");
+    if(pos != link.npos)
+    {
+        addition = link.substr(pos + 1);
+        link.erase(pos);
+    }
+
+    std::vector<std::string> arguments = split(link, ":");
+    if(arguments.size() < 2)
+        return;
+    server = arguments[0];
+    port = arguments[1];
+
+    if(port == "0")
+        return;
+
+    publicKey = getUrlArg(addition, "publicKey");
+    privateKey = getUrlArg(addition, "privateKey");
+    ip = getUrlArg(addition, "ip");
+    ipv6 = getUrlArg(addition, "ipv6");
+    mtu = getUrlArg(addition, "mtu");
+    udp = getUrlArg(addition, "udp");
+    reserved = getUrlArg(addition, "reserved");
+
+    group = urlDecode(getUrlArg(addition, "group"));
+
+    if(remark.empty())
+        remark = server + ":" + port;
+    if(group.empty())
+        group = WIREGUARD_DEFAULT_GROUP;
+
+    wireGuardConstruct(node, group, remark, server, port, publicKey, privateKey, ip, ipv6, mtu, udp, reserved);
 }
 
 void explodeQuan(const std::string &quan, Proxy &node)
@@ -2079,6 +2136,8 @@ void explode(const std::string &link, Proxy &node)
         explodeNetch(link, node);
     else if(strFind(link, "trojan://"))
         explodeTrojan(link, node);
+    else if(strFind(link, "wg://"))
+        explodeWireGuard(link, node);
     else if(isLink(link))
         explodeHTTPSub(link, node);
 }

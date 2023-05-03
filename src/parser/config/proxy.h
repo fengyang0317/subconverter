@@ -14,6 +14,7 @@ enum ProxyType
     ShadowsocksR,
     VMess,
     Trojan,
+    WireGuard,
     Snell,
     HTTP,
     HTTPS,
@@ -77,6 +78,13 @@ struct Proxy
     String QUICSecure;
     String QUICSecret;
 
+    String publicKey;
+    String privateKey;
+    String ip;
+    String ipv6;
+    String mtu;
+    String reserved;
+
     tribool UDP;
     tribool TCPFastOpen;
     tribool AllowInsecure;
@@ -92,6 +100,7 @@ struct Proxy
 #define SOCKS_DEFAULT_GROUP "SocksProvider"
 #define HTTP_DEFAULT_GROUP "HTTPProvider"
 #define TROJAN_DEFAULT_GROUP "TrojanProvider"
+#define WIREGUARD_DEFAULT_GROUP "WireGuardProvider"
 #define SNELL_DEFAULT_GROUP "SnellProvider"
 
 #endif // PROXY_H_INCLUDED

@@ -18,6 +18,7 @@
 #include "../../utils/rapidjson_extra.h"
 #include "../../utils/regexp.h"
 #include "../../utils/stl_extra.h"
+#include "../../utils/string.h"
 #include "../../utils/urlencode.h"
 #include "../../utils/yamlcpp_extra.h"
 #include "nodemanip.h"
@@ -422,6 +423,17 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
                     singleproxy["ws-opts"]["headers"]["Host"] = x.Host;
                 break;
             }
+            break;
+        case ProxyType::WireGuard:
+            singleproxy["type"] = "wireguard";
+            singleproxy["server"] = x.Hostname;
+            singleproxy["port"] = x.Port;
+            singleproxy["ip"] = x.ip;
+            singleproxy["ipv6"] = x.ipv6;
+            singleproxy["public-key"] = x.publicKey;
+            singleproxy["private-key"] = x.privateKey;
+            singleproxy["mtu"] = x.mtu;
+            singleproxy["reserved"] = split(x.reserved, ",");
             break;
         case ProxyType::Snell:
             if (x.SnellVersion >= 4)
