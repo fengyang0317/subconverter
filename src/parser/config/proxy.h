@@ -84,6 +84,7 @@ struct Proxy
     String ipv6;
     String mtu;
     String reserved;
+    String dialer_proxy;
 
     tribool UDP;
     tribool TCPFastOpen;

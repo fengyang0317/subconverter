@@ -106,7 +106,7 @@ void trojanConstruct(Proxy &node, const std::string &group, const std::string &r
     node.Path = path;
 }
 
-void wireGuardConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &publicKey, const std::string &privateKey, const std::string &ip, const std::string &ipv6, const std::string &mtu, tribool udp, std::string& reserved, tribool tfo, tribool scv, tribool tls13)
+void wireGuardConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &publicKey, const std::string &privateKey, const std::string &ip, const std::string &ipv6, const std::string &mtu, tribool udp, std::string& reserved, const std::string &dialer_proxy, tribool tfo, tribool scv, tribool tls13)
 {
     commonConstruct(node, ProxyType::WireGuard, group, remarks, server, port, udp, tfo, scv, tls13);
     node.publicKey = publicKey;
@@ -115,6 +115,7 @@ void wireGuardConstruct(Proxy &node, const std::string &group, const std::string
     node.ipv6 = ipv6;
     node.mtu = mtu.empty() ? "1280" : mtu;
     node.reserved = reserved;
+    node.dialer_proxy = dialer_proxy;
 }
 
 void snellConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &password, const std::string &obfs, const std::string &host, uint16_t version, tribool udp, tribool tfo, tribool scv)
@@ -781,7 +782,7 @@ void explodeTrojan(std::string trojan, Proxy &node)
 
 void explodeWireGuard(std::string link, Proxy &node)
 {
-    std::string server, port, addition, group, remark, publicKey, privateKey, ip, ipv6, mtu, reserved;
+    std::string server, port, addition, group, remark, publicKey, privateKey, ip, ipv6, mtu, reserved, dialer_proxy;
     tribool udp;
     link.erase(0, 5);
     string_size pos = link.rfind("#");
@@ -814,6 +815,7 @@ void explodeWireGuard(std::string link, Proxy &node)
     mtu = getUrlArg(addition, "mtu");
     udp = getUrlArg(addition, "udp");
     reserved = getUrlArg(addition, "reserved");
+    dialer_proxy = getUrlArg(addition, "dialer-proxy");
 
     group = urlDecode(getUrlArg(addition, "group"));
 
@@ -822,7 +824,7 @@ void explodeWireGuard(std::string link, Proxy &node)
     if(group.empty())
         group = WIREGUARD_DEFAULT_GROUP;
 
-    wireGuardConstruct(node, group, remark, server, port, publicKey, privateKey, ip, ipv6, mtu, udp, reserved);
+    wireGuardConstruct(node, group, remark, server, port, publicKey, privateKey, ip, ipv6, mtu, udp, reserved, dialer_proxy);
 }
 
 void explodeQuan(const std::string &quan, Proxy &node)

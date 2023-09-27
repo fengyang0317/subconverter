@@ -434,6 +434,7 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
             singleproxy["private-key"] = x.privateKey;
             singleproxy["mtu"] = x.mtu;
             singleproxy["reserved"] = split(x.reserved, ",");
+            singleproxy["dialer-proxy"] = x.dialer_proxy;
             break;
         case ProxyType::Snell:
             if (x.SnellVersion >= 4)
